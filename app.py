@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 from docx import Document
-from docx_properties import core_properties
 import os
 import uuid
 
@@ -21,18 +20,16 @@ def convert_docx_to_text():
     file.save(docx_path)
 
     try:
-        # Extract text
         doc = Document(docx_path)
         text = "\n".join([p.text for p in doc.paragraphs if p.text.strip() != ""])
+        props = doc.core_properties
 
-        # Metadata
-        props = core_properties(docx_path)
         metadata = {
-            "numpages": 1,  # Estimating 1 (docx doesn't track this)
+            "numpages": 1,
             "numrender": 1,
             "info": {
                 "PDFFormatVersion": None,
-                "Language": None,
+                "Language": props.language if props.language else None,
                 "EncryptFilterName": None,
                 "IsLinearized": False,
                 "IsAcroFormPresent": False,
@@ -40,10 +37,13 @@ def convert_docx_to_text():
                 "IsCollectionPresent": False,
                 "IsSignaturesPresent": False,
                 "CreationDate": props.created.isoformat() if props.created else None,
-                "Creator": props.creator,
+                "Creator": props.author,
                 "ModDate": props.modified.isoformat() if props.modified else None,
                 "Custom": {
-                    "Application": props.last_modified_by
+                    "Title": props.title,
+                    "Subject": props.subject,
+                    "Category": props.category,
+                    "Comments": props.comments,
                 },
                 "Producer": "python-docx",
                 "Trapped": {
