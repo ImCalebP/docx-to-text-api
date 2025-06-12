@@ -21,7 +21,7 @@ def convert_docx_to_text():
     doc = Document(file_path)
     text = "\n".join([para.text for para in doc.paragraphs])
 
-    # Save to .txt
+    # Save to .txt (optional)
     with open("output.txt", "w", encoding="utf-8") as f:
         f.write(text)
 
@@ -29,5 +29,7 @@ def convert_docx_to_text():
 
     return jsonify({"message": "File converted successfully", "text": text})
 
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Use Render’s PORT
+    app.run(host="0.0.0.0", port=port)        # Bind to all interfaces
